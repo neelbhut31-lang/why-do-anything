@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-paper text-ink antialiased transition-colors duration-300 dark:bg-[#171916] dark:text-[#ecece6];
+}
+
+::selection {
+  @apply bg-moss-300/60 text-ink;
+}
+
+@layer components {
+  .container-reading {
+    @apply mx-auto w-full max-w-3xl px-5 sm:px-8;
+  }
+
+  .container-wide {
+    @apply mx-auto w-full max-w-6xl px-5 sm:px-8;
+  }
+
+  .prose-wda {
+    @apply text-[1.08rem] leading-[1.85] text-[#393d37] dark:text-[#cfd1ca];
+  }
+
+  .prose-wda h1 {
+    @apply mb-6 mt-12 font-serif text-4xl leading-tight text-ink dark:text-white;
+  }
+
+  .prose-wda h2 {
+    @apply mb-4 mt-12 font-serif text-3xl leading-tight text-ink dark:text-white;
+  }
+
+  .prose-wda h3 {
+    @apply mb-3 mt-9 text-xl font-semibold text-ink dark:text-white;
+  }
+
+  .prose-wda p {
+    @apply my-6;
+  }
+
+  .prose-wda ul {
+    @apply my-6 list-disc space-y-2 pl-6;
+  }
+
+  .prose-wda ol {
+    @apply my-6 list-decimal space-y-2 pl-6;
+  }
+
+  .prose-wda blockquote {
+    @apply my-8 border-l-2 border-moss-500 pl-6 font-serif text-2xl italic leading-relaxed text-ink dark:text-[#e7e7df];
+  }
+
+  .prose-wda a {
+    @apply decoration-moss-500 underline decoration-1 underline-offset-4 transition-colors hover:text-moss-700 dark:hover:text-moss-300;
+  }
+
+  .prose-wda img {
+    @apply my-10 h-auto w-full rounded-2xl object-cover shadow-soft;
+  }
+}

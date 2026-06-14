@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Page {
+  id            String      @id @default(cuid())
+  title         String
+  slug          String
+  parentId      String?
+  parent        Page?       @relation("PageHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children      Page[]      @relation("PageHierarchy")
+  content       String      @default("")
+  featuredImage String?
+  displayOrder  Int         @default(0)
+  status        PageStatus  @default(DRAFT)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([parentId, slug])
+  @@index([parentId, displayOrder])
+  @@index([status])
+}
+
+enum PageStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model Media {
+  id        String   @id @default(cuid())
+  filename  String
+  url       String
+  mimeType  String
+  size      Int
+  altText   String?
+  createdAt DateTime @default(now())
+}
