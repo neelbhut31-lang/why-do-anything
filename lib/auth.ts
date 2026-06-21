@@ -46,7 +46,23 @@ export async function requireAdmin() {
 }
 
 export async function verifyCredentials(email: string, password: string) {
-  const user = await db.user.findUnique({ where: { email: email.toLowerCase() } });
+  const normalizedEmail = email.toLowerCase();
+  let user = await db.user.findUnique({ where: { email: normalizedEmail } });
+
+  // Creates the first administrator from private deployment settings.
+  if (
+    !user &&
+    normalizedEmail === process.env.ADMIN_EMAIL?.toLowerCase() &&
+    process.env.ADMIN_PASSWORD
+  ) {
+    user = await db.user.create({
+      data: {
+        email: normalizedEmail,
+        passwordHash: await bcrypt.hash(process.env.ADMIN_PASSWORD, 12),
+      },
+    });
+  }
+
   if (!user || !(await bcrypt.compare(password, user.passwordHash))) return null;
   return user;
 }

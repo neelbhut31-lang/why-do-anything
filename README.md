@@ -6,10 +6,10 @@ A calm, content-first library for understanding how daily habits affect the body
 
 - Next.js 15 App Router and TypeScript
 - Tailwind CSS with system-aware dark mode
-- Prisma with SQLite
+- Prisma with Supabase PostgreSQL
 - Signed, HTTP-only cookie authentication
 - TipTap rich text editor
-- Local image uploads with media records
+- Supabase Storage image uploads with media records
 
 ## Run locally
 
@@ -37,4 +37,6 @@ Every item is a `Page`. Pages can be nested to any depth and their URL, breadcru
 
 ## Production notes
 
-SQLite and `public/uploads` work well on a persistent Node server or Docker volume. On serverless hosts with ephemeral filesystems, replace SQLite with PostgreSQL and the upload route with durable object storage such as S3 or Cloudflare R2. Keep the same `Page` and `Media` interfaces so the application layer does not need to change.
+This project is ready for Vercel plus Supabase. Vercel runs the website, Supabase PostgreSQL stores pages and users, and the Supabase `media` bucket stores uploaded images. The Vercel build command runs Prisma database setup and seeds starter content automatically.
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for the beginner-friendly deployment checklist.
