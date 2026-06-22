@@ -1,7 +1,7 @@
 import { TopicCard } from "@/components/topic-card";
 import { getPublishedTree } from "@/lib/pages";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export default async function HomePage() {
   const topics = await getPublishedTree();

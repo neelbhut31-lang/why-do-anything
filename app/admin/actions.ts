@@ -1,11 +1,12 @@
 "use server";
 
 import { PageStatus } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createSession, requireAdmin, SESSION_COOKIE, verifyCredentials } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { PUBLISHED_PAGES_CACHE_TAG } from "@/lib/pages";
 import { slugify } from "@/lib/utils";
 
 export async function loginAction(formData: FormData) {
@@ -96,6 +97,7 @@ export async function savePageAction(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
+  revalidateTag(PUBLISHED_PAGES_CACHE_TAG);
   redirect(`/admin/pages/${pageId}?saved=1`);
 }
 
@@ -103,6 +105,7 @@ export async function deletePageAction(id: string) {
   await requireAdmin();
   await db.page.delete({ where: { id } });
   revalidatePath("/", "layout");
+  revalidateTag(PUBLISHED_PAGES_CACHE_TAG);
   redirect("/admin");
 }
 
@@ -123,4 +126,5 @@ export async function movePageAction(id: string, direction: "up" | "down") {
     db.page.update({ where: { id: swapWith.id }, data: { displayOrder: page.displayOrder } }),
   ]);
   revalidatePath("/", "layout");
+  revalidateTag(PUBLISHED_PAGES_CACHE_TAG);
 }

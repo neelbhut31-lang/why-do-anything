@@ -1,11 +1,9 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
-import { PageStatus } from "@prisma/client";
-import { db } from "@/lib/db";
-import { getPagePath } from "@/lib/pages";
+import { getPagePath, getPublishedPages } from "@/lib/pages";
 import { excerpt, stripHtml } from "@/lib/utils";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export default async function SearchPage({
   searchParams,
@@ -13,9 +11,7 @@ export default async function SearchPage({
   searchParams: Promise<{ q?: string }>;
 }) {
   const query = (await searchParams).q?.trim() ?? "";
-  const candidates = query
-    ? await db.page.findMany({ where: { status: PageStatus.PUBLISHED } })
-    : [];
+  const candidates = query ? await getPublishedPages() : [];
   const needle = query.toLowerCase();
   const matches = candidates
     .filter((page) => `${page.title} ${stripHtml(page.content)}`.toLowerCase().includes(needle))
