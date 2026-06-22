@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
   type CSSProperties,
   type MouseEvent,
@@ -28,6 +28,7 @@ export function InstantLink({
   "aria-label": ariaLabel,
 }: InstantLinkProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const ref = useRef<HTMLAnchorElement>(null);
   const prefetched = useRef(false);
   const [pending, setPending] = useState(false);
@@ -37,6 +38,10 @@ export function InstantLink({
     prefetched.current = true;
     router.prefetch(href);
   }, [href, router]);
+
+  useEffect(() => {
+    setPending(false);
+  }, [pathname]);
 
   useEffect(() => {
     const node = ref.current;
@@ -76,7 +81,7 @@ export function InstantLink({
       href={href}
       prefetch
       aria-label={ariaLabel}
-      className={className}
+      className={`relative ${className ?? ""}`}
       style={style}
       onMouseEnter={prefetch}
       onFocus={prefetch}
