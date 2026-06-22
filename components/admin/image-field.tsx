@@ -7,6 +7,7 @@ import { ImagePlus, X } from "lucide-react";
 export function ImageField({ initialValue = "" }: { initialValue?: string }) {
   const [value, setValue] = useState(initialValue);
   const [uploading, setUploading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const upload = async (file?: File) => {
@@ -21,8 +22,32 @@ export function ImageField({ initialValue = "" }: { initialValue?: string }) {
     setValue(data.url);
   };
 
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      void upload(e.dataTransfer.files[0]);
+    }
+  };
+
   return (
-    <div>
+    <div
+      onDragEnter={handleDrag}
+      onDragOver={handleDrag}
+      onDragLeave={handleDrag}
+      onDrop={handleDrop}
+    >
       <input type="hidden" name="featuredImage" value={value} />
       <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={(event) => void upload(event.target.files?.[0])} />
       {value ? (
@@ -33,8 +58,17 @@ export function ImageField({ initialValue = "" }: { initialValue?: string }) {
           </button>
         </div>
       ) : (
-        <button type="button" disabled={uploading} onClick={() => inputRef.current?.click()} className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-black/15 py-10 text-sm text-black/45 hover:border-moss-500 dark:border-white/15 dark:text-white/40">
-          <ImagePlus size={18} /> {uploading ? "Uploading…" : "Choose featured image"}
+        <button
+          type="button"
+          disabled={uploading}
+          onClick={() => inputRef.current?.click()}
+          className={`flex w-full items-center justify-center gap-2 rounded-xl border border-dashed py-10 text-sm transition ${
+            dragActive
+              ? "border-moss-500 bg-moss-50/50 text-moss-700 dark:bg-moss-900/20 dark:text-moss-300"
+              : "border-black/15 text-black/45 hover:border-moss-500 dark:border-white/15 dark:text-white/40"
+          }`}
+        >
+          <ImagePlus size={18} /> {uploading ? "Uploading…" : dragActive ? "Drop to upload!" : "Choose featured image"}
         </button>
       )}
     </div>
