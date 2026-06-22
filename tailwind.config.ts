@@ -45,11 +45,16 @@ export default {
       },
       animation: {
         "fade-up": "fadeUp 600ms ease-out both",
+        "link-progress": "linkProgress 700ms ease-in-out infinite",
       },
       keyframes: {
         fadeUp: {
           from: { opacity: "0", transform: "translateY(10px)" },
           to: { opacity: "1", transform: "translateY(0)" },
+        },
+        linkProgress: {
+          "0%": { transform: "translateX(-120%)" },
+          "100%": { transform: "translateX(220%)" },
         },
       },
     },

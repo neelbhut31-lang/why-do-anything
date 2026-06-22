@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import type { Page } from "@prisma/client";
+import { InstantLink } from "@/components/instant-link";
 import { excerpt } from "@/lib/utils";
 
 export function TopicCard({
@@ -13,7 +13,7 @@ export function TopicCard({
   index?: number;
 }) {
   return (
-    <Link
+    <InstantLink
       href={href}
       className="group relative flex min-h-56 animate-fade-up flex-col justify-between overflow-hidden rounded-3xl border border-black/[0.08] bg-white/45 p-7 shadow-soft transition duration-300 hover:-translate-y-1 hover:border-moss-500/40 hover:bg-white/75 dark:border-white/[0.09] dark:bg-white/[0.025] dark:hover:bg-white/[0.05]"
       style={{ animationDelay: `${index * 70}ms` }}
@@ -41,6 +41,6 @@ export function TopicCard({
           </p>
         ) : null}
       </div>
-    </Link>
+    </InstantLink>
   );
 }

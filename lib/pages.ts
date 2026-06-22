@@ -2,6 +2,7 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 import { PageStatus, type Page } from "@prisma/client";
 import { db } from "@/lib/db";
+import { getSupabaseAdmin } from "@/lib/supabase";
 
 export type PageNode = Page & { children: PageNode[] };
 export const PUBLISHED_PAGES_CACHE_TAG = "published-pages";
@@ -13,13 +14,93 @@ export function buildPageTree(pages: Page[], parentId: string | null = null): Pa
     .map((page) => ({ ...page, children: buildPageTree(pages, page.id) }));
 }
 
+export async function fetchSnapshotFromStorage(): Promise<Page[] | null> {
+  try {
+    const url = process.env.SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !serviceRoleKey) {
+      console.warn("Supabase credentials not configured in environment.");
+      return null;
+    }
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase.storage
+      .from("media")
+      .download("published-pages.json");
+
+    if (error) {
+      const errStatus = (error as { status?: number }).status;
+      if (error.message.includes("Object not found") || errStatus === 404) {
+        console.info("Snapshot published-pages.json not found in Supabase Storage. Will query database.");
+      } else {
+        console.warn("Error downloading snapshot from Supabase Storage:", error.message);
+      }
+      return null;
+    }
+
+    if (data) {
+      const text = await data.text();
+      const rawPages = JSON.parse(text);
+      if (Array.isArray(rawPages)) {
+        return rawPages.map((p: Omit<Page, "createdAt" | "updatedAt"> & { createdAt: string; updatedAt: string }) => ({
+          ...p,
+          createdAt: new Date(p.createdAt),
+          updatedAt: new Date(p.updatedAt),
+        }));
+      }
+    }
+  } catch (err) {
+    console.warn("Failed to fetch snapshot from Supabase Storage:", err);
+  }
+  return null;
+}
+
+export async function generateAndUploadSnapshot() {
+  try {
+    const url = process.env.SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !serviceRoleKey) {
+      console.warn("Supabase credentials not configured. Cannot generate snapshot.");
+      return;
+    }
+
+    const pages = await db.page.findMany({
+      where: { status: PageStatus.PUBLISHED },
+      orderBy: [{ displayOrder: "asc" }, { title: "asc" }],
+    });
+
+    const jsonStr = JSON.stringify(pages);
+    const supabase = getSupabaseAdmin();
+
+    const { error } = await supabase.storage
+      .from("media")
+      .upload("published-pages.json", Buffer.from(jsonStr), {
+        contentType: "application/json",
+        upsert: true,
+      });
+
+    if (error) {
+      console.error("Failed to upload snapshot to Supabase Storage:", error.message);
+    } else {
+      console.info("Successfully updated published-pages snapshot in Supabase Storage.");
+    }
+  } catch (err) {
+    console.error("Error in generateAndUploadSnapshot:", err);
+  }
+}
+
 export const getPublishedPages = unstable_cache(
-  async () => db.page.findMany({
-    where: { status: PageStatus.PUBLISHED },
-    orderBy: [{ displayOrder: "asc" }, { title: "asc" }],
-  }),
+  async () => {
+    const snapshot = await fetchSnapshotFromStorage();
+    if (snapshot) {
+      return snapshot;
+    }
+    return db.page.findMany({
+      where: { status: PageStatus.PUBLISHED },
+      orderBy: [{ displayOrder: "asc" }, { title: "asc" }],
+    });
+  },
   ["published-pages"],
-  { revalidate: 300, tags: [PUBLISHED_PAGES_CACHE_TAG] },
+  { revalidate: 86400, tags: [PUBLISHED_PAGES_CACHE_TAG] },
 );
 
 export async function getPublishedTree() {

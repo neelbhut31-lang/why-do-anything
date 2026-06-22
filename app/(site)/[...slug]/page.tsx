@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { InstantLink } from "@/components/instant-link";
 import { getPageByPath, getPublishedStaticParams } from "@/lib/pages";
 import { excerpt } from "@/lib/utils";
 
@@ -73,10 +73,10 @@ export default async function ContentPage({ params }: Props) {
           </p>
           <div className="divide-y divide-black/[0.08] dark:divide-white/[0.09]">
             {children.map((child) => (
-              <Link
+              <InstantLink
                 key={child.id}
                 href={`${basePath}/${child.slug}`}
-                className="group flex items-center justify-between gap-6 py-6"
+                className="group relative flex items-center justify-between gap-6 py-6"
               >
                 <div>
                   <h2 className="font-serif text-2xl">{child.title}</h2>
@@ -87,7 +87,7 @@ export default async function ContentPage({ params }: Props) {
                   ) : null}
                 </div>
                 <ArrowRight size={18} className="shrink-0 text-black/30 transition group-hover:translate-x-1 group-hover:text-moss-700 dark:group-hover:text-moss-300" />
-              </Link>
+              </InstantLink>
             ))}
           </div>
         </section>

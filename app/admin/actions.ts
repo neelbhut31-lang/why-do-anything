@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createSession, requireAdmin, SESSION_COOKIE, verifyCredentials } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { PUBLISHED_PAGES_CACHE_TAG } from "@/lib/pages";
+import { PUBLISHED_PAGES_CACHE_TAG, generateAndUploadSnapshot } from "@/lib/pages";
 import { slugify } from "@/lib/utils";
 
 export async function loginAction(formData: FormData) {
@@ -98,6 +98,7 @@ export async function savePageAction(formData: FormData) {
 
   revalidatePath("/", "layout");
   revalidateTag(PUBLISHED_PAGES_CACHE_TAG);
+  await generateAndUploadSnapshot();
   redirect(`/admin/pages/${pageId}?saved=1`);
 }
 
@@ -106,6 +107,7 @@ export async function deletePageAction(id: string) {
   await db.page.delete({ where: { id } });
   revalidatePath("/", "layout");
   revalidateTag(PUBLISHED_PAGES_CACHE_TAG);
+  await generateAndUploadSnapshot();
   redirect("/admin");
 }
 
@@ -127,4 +129,5 @@ export async function movePageAction(id: string, direction: "up" | "down") {
   ]);
   revalidatePath("/", "layout");
   revalidateTag(PUBLISHED_PAGES_CACHE_TAG);
+  await generateAndUploadSnapshot();
 }
