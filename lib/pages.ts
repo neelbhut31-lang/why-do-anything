@@ -23,12 +23,24 @@ export const getPublishedPages = unstable_cache(
 );
 
 export async function getPublishedTree() {
-  const pages = await getPublishedPages();
+  let pages: Page[];
+  try {
+    pages = await getPublishedPages();
+  } catch (error) {
+    console.warn("Could not load published page tree:", error);
+    return [];
+  }
   return buildPageTree(pages);
 }
 
 export async function getPageByPath(segments: string[]) {
-  const pages = await getPublishedPages();
+  let pages: Page[];
+  try {
+    pages = await getPublishedPages();
+  } catch (error) {
+    console.warn("Could not load published page:", error);
+    return null;
+  }
   let parentId: string | null = null;
   const ancestors: Page[] = [];
 
@@ -58,4 +70,24 @@ export async function getPagePath(pageId: string) {
     current = current.parentId ? pages.find((page) => page.id === current?.parentId) ?? null : null;
   }
   return `/${path.map((page) => page.slug).join("/")}`;
+}
+
+export async function getPublishedStaticParams() {
+  const pages = await getPublishedPages();
+
+  function getSegments(page: Page): string[] {
+    const ancestors: string[] = [];
+    let current: Page | undefined = page;
+
+    while (current) {
+      ancestors.unshift(current.slug);
+      current = current.parentId
+        ? pages.find((candidate) => candidate.id === current?.parentId)
+        : undefined;
+    }
+
+    return ancestors;
+  }
+
+  return pages.map((page) => ({ slug: getSegments(page) }));
 }

@@ -4,12 +4,22 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { getPageByPath } from "@/lib/pages";
+import { getPageByPath, getPublishedStaticParams } from "@/lib/pages";
 import { excerpt } from "@/lib/utils";
 
 export const revalidate = 300;
+export const dynamicParams = true;
 
 type Props = { params: Promise<{ slug: string[] }> };
+
+export async function generateStaticParams() {
+  try {
+    return await getPublishedStaticParams();
+  } catch (error) {
+    console.warn("Could not prebuild published pages:", error);
+    return [];
+  }
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
