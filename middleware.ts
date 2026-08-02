@@ -6,6 +6,10 @@ const secret = new TextEncoder().encode(
 );
 
 export async function middleware(request: NextRequest) {
+  if (request.nextUrl.pathname === "/admin/login") {
+    return NextResponse.next();
+  }
+
   const token = request.cookies.get("wda_session")?.value;
   if (!token) return NextResponse.redirect(new URL("/admin/login", request.url));
   try {
@@ -17,5 +21,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/((?!login).*)", "/api/upload/:path*"],
+  matcher: ["/admin", "/admin/:path*", "/api/upload/:path*"],
 };
