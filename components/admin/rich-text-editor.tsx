@@ -6,7 +6,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import {
-  Bold, Heading2, Heading3, ImagePlus, Italic, Link as LinkIcon,
+  Bold, Code, Heading2, Heading3, ImagePlus, Italic, Link as LinkIcon,
   List, ListOrdered, Quote, Redo2, Undo2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -41,20 +41,8 @@ async function uploadImage(file: File) {
 export function RichTextEditor({ initialContent }: { initialContent: string }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
-
-  const insertImage = async (file?: File) => {
-    if (!file) return;
-    setUploadingImage(true);
-    try {
-      const { url } = await uploadImage(file);
-      editor?.chain().focus().setImage({ src: url, alt: file.name }).run();
-    } catch (err) {
-      console.error(err);
-      window.alert("Image upload failed");
-    } finally {
-      setUploadingImage(false);
-    }
-  };
+  const [htmlMode, setHtmlMode] = useState(false);
+  const [rawHtml, setRawHtml] = useState(initialContent);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -64,6 +52,9 @@ export function RichTextEditor({ initialContent }: { initialContent: string }) {
       Link.configure({ openOnClick: false, autolink: true }),
     ],
     content: initialContent,
+    onUpdate: ({ editor }) => {
+      setRawHtml(editor.getHTML());
+    },
     editorProps: {
       attributes: {
         class: "prose-wda min-h-[420px] px-5 py-6 outline-none sm:px-8",
@@ -122,6 +113,33 @@ export function RichTextEditor({ initialContent }: { initialContent: string }) {
 
   if (!editor) return <div className="min-h-[480px] animate-pulse rounded-xl bg-black/5 dark:bg-white/5" />;
 
+  const toggleHtmlMode = () => {
+    if (htmlMode) {
+      editor.commands.setContent(rawHtml);
+    } else {
+      setRawHtml(editor.getHTML());
+    }
+    setHtmlMode(!htmlMode);
+  };
+
+  const insertImage = async (file?: File) => {
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const { url } = await uploadImage(file);
+      if (htmlMode) {
+        setRawHtml((prev) => `${prev}\n<img src="${url}" alt="${file.name}" class="editor-image" />`);
+      } else {
+        editor.chain().focus().setImage({ src: url, alt: file.name }).run();
+      }
+    } catch (err) {
+      console.error(err);
+      window.alert("Image upload failed");
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   const setLink = () => {
     const previous = editor.getAttributes("link").href as string | undefined;
     const url = window.prompt("Link URL", previous ?? "https://");
@@ -132,7 +150,7 @@ export function RichTextEditor({ initialContent }: { initialContent: string }) {
 
   return (
     <div className="overflow-hidden rounded-xl border border-black/10 bg-white dark:border-white/10 dark:bg-[#1b1e1a]">
-      <input type="hidden" name="content" value={editor.getHTML()} />
+      <input type="hidden" name="content" value={htmlMode ? rawHtml : editor.getHTML()} />
       <input
         ref={inputRef}
         type="file"
@@ -154,6 +172,10 @@ export function RichTextEditor({ initialContent }: { initialContent: string }) {
           <ToolButton label="Quote" active={editor.isActive("blockquote")} onClick={() => editor.chain().focus().toggleBlockquote().run()}><Quote size={16} /></ToolButton>
           <ToolButton label="Link" active={editor.isActive("link")} onClick={setLink}><LinkIcon size={16} /></ToolButton>
           <ToolButton label="Insert image" onClick={() => inputRef.current?.click()}><ImagePlus size={17} /></ToolButton>
+          <span className="mx-1 w-px bg-black/10 dark:bg-white/10" />
+          <ToolButton label={htmlMode ? "Switch to Visual Editor" : "Switch to HTML Code Mode"} active={htmlMode} onClick={toggleHtmlMode}>
+            <Code size={16} />
+          </ToolButton>
         </div>
         {uploadingImage ? (
           <span className="text-xs text-moss-700 dark:text-moss-300 font-medium animate-pulse pr-2">
@@ -161,7 +183,16 @@ export function RichTextEditor({ initialContent }: { initialContent: string }) {
           </span>
         ) : null}
       </div>
-      <EditorContent editor={editor} />
+      {htmlMode ? (
+        <textarea
+          value={rawHtml}
+          onChange={(e) => setRawHtml(e.target.value)}
+          placeholder="Paste or write HTML code here..."
+          className="min-h-[420px] w-full font-mono text-sm p-5 bg-black/[0.02] dark:bg-white/[0.02] text-black dark:text-white outline-none resize-y border-none"
+        />
+      ) : (
+        <EditorContent editor={editor} />
+      )}
     </div>
   );
 }
