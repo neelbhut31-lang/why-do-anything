@@ -18,24 +18,19 @@ export async function fetchSnapshotFromStorage(): Promise<Page[] | null> {
   try {
     const url = process.env.SUPABASE_URL;
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!url || !serviceRoleKey) {
-      console.warn("Supabase credentials not configured in environment.");
-      return null;
-    }
+    if (!url || !serviceRoleKey) return null;
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 1000);
+
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase.storage
       .from("media")
       .download("published-pages.json");
 
-    if (error) {
-      const errStatus = (error as { status?: number }).status;
-      if (error.message.includes("Object not found") || errStatus === 404) {
-        console.info("Snapshot published-pages.json not found in Supabase Storage. Will query database.");
-      } else {
-        console.warn("Error downloading snapshot from Supabase Storage:", error.message);
-      }
-      return null;
-    }
+    clearTimeout(timer);
+
+    if (error) return null;
 
     if (data) {
       const text = await data.text();
@@ -48,8 +43,8 @@ export async function fetchSnapshotFromStorage(): Promise<Page[] | null> {
         }));
       }
     }
-  } catch (err) {
-    console.warn("Failed to fetch snapshot from Supabase Storage:", err);
+  } catch {
+    // Fail silently & quickly to direct DB fallback
   }
   return null;
 }
