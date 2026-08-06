@@ -14,7 +14,7 @@ export async function loginAction(formData: FormData) {
   const password = String(formData.get("password") ?? "");
   const user = await verifyCredentials(email, password);
   if (!user) redirect("/admin/login?error=Invalid%20email%20or%20password");
-  await createSession(user.id);
+  await createSession(user.id, user.email);
   redirect("/admin");
 }
 

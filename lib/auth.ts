@@ -10,8 +10,8 @@ const secret = new TextEncoder().encode(
   process.env.AUTH_SECRET ?? "development-only-secret-change-before-production",
 );
 
-export async function createSession(userId: string) {
-  const token = await new SignJWT({ userId })
+export async function createSession(userId: string, email: string) {
+  const token = await new SignJWT({ userId, email })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
@@ -32,8 +32,8 @@ export async function getSession() {
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, secret);
-    if (typeof payload.userId !== "string") return null;
-    return db.user.findUnique({ where: { id: payload.userId } });
+    if (typeof payload.userId !== "string" || typeof payload.email !== "string") return null;
+    return { id: payload.userId, email: payload.email };
   } catch {
     return null;
   }
