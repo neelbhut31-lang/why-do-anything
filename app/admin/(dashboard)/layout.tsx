@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { InstantLink } from "@/components/instant-link";
 import { BookOpen, ExternalLink, LogOut, Plus } from "lucide-react";
 import { logoutAction } from "@/app/admin/actions";
 import { requireAdmin } from "@/lib/auth";
@@ -28,12 +29,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <div className="mx-auto grid max-w-7xl gap-8 px-5 py-8 sm:px-8 lg:grid-cols-[220px_1fr]">
         <aside>
           <nav className="flex gap-2 lg:flex-col">
-            <Link href="/admin" className="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white dark:hover:bg-white/5">
+            <InstantLink href="/admin" className="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white dark:hover:bg-white/5">
               All pages
-            </Link>
-            <Link href="/admin/pages/new" className="flex items-center gap-2 rounded-xl bg-ink px-4 py-3 text-sm font-medium text-white dark:bg-[#e9e9e2] dark:text-ink">
+            </InstantLink>
+            <InstantLink href="/admin/pages/new" className="flex items-center gap-2 rounded-xl bg-ink px-4 py-3 text-sm font-medium text-white dark:bg-[#e9e9e2] dark:text-ink">
               <Plus size={16} /> New page
-            </Link>
+            </InstantLink>
           </nav>
         </aside>
         <main className="min-w-0">{children}</main>

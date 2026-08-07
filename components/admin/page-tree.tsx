@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { InstantLink } from "@/components/instant-link";
 import { ChevronDown, ChevronUp, Circle, FileText } from "lucide-react";
 import { movePageAction } from "@/app/admin/actions";
 import type { PageNode } from "@/lib/pages";
@@ -10,9 +10,9 @@ export function AdminPageTree({ nodes, depth = 0 }: { nodes: PageNode[]; depth?:
         <div key={page.id}>
           <div className="group flex items-center gap-2 border-b border-black/[0.06] py-2.5 dark:border-white/[0.06]">
             <FileText size={15} className="shrink-0 text-black/30 dark:text-white/30" />
-            <Link href={`/admin/pages/${page.id}`} className="min-w-0 flex-1 truncate text-sm font-medium hover:text-moss-700 dark:hover:text-moss-300">
+            <InstantLink href={`/admin/pages/${page.id}`} className="min-w-0 flex-1 truncate text-sm font-medium hover:text-moss-700 dark:hover:text-moss-300">
               {page.title}
-            </Link>
+            </InstantLink>
             <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-black/35 dark:text-white/30">
               <Circle size={6} fill="currentColor" className={page.status === "PUBLISHED" ? "text-emerald-600" : ""} />
               {page.status.toLowerCase()}
