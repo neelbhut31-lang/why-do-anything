@@ -12,8 +12,8 @@ export default async function EditPage({
   const { id } = await params;
   const [page, pages] = await Promise.all([
     db.page.findUnique({ where: { id } }),
-    db.page.findMany({ orderBy: { title: "asc" } }),
+    db.page.findMany({ select: { id: true, title: true, parentId: true }, orderBy: { title: "asc" } }),
   ]);
   if (!page) notFound();
-  return <PageForm page={page} pages={pages} saved={(await searchParams).saved === "1"} />;
+  return <PageForm page={page} pages={pages as any[]} saved={(await searchParams).saved === "1"} />;
 }

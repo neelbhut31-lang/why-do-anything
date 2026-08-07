@@ -1,8 +1,16 @@
+import dynamic from "next/dynamic";
 import type { Page } from "@prisma/client";
 import { deletePageAction, savePageAction } from "@/app/admin/actions";
 import { DeleteButton } from "@/components/admin/delete-button";
 import { ImageField } from "@/components/admin/image-field";
-import { RichTextEditor } from "@/components/admin/rich-text-editor";
+
+const RichTextEditor = dynamic(
+  () => import("@/components/admin/rich-text-editor").then((mod) => mod.RichTextEditor),
+  {
+    ssr: false,
+    loading: () => <div className="min-h-[480px] animate-pulse rounded-xl bg-black/5 dark:bg-white/5" />,
+  },
+);
 
 export function PageForm({
   page,
