@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, BookOpen } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { InstantLink } from "@/components/instant-link";
+import { ViewCounter } from "@/components/view-counter";
 import { getPageByPath, getPublishedStaticParams } from "@/lib/pages";
 import { excerpt } from "@/lib/utils";
 
@@ -25,10 +26,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const result = await getPageByPath(slug);
   if (!result) return {};
+  const { page } = result;
   return {
-    title: result.page.title,
-    description: excerpt(result.page.content),
-    openGraph: result.page.featuredImage ? { images: [result.page.featuredImage] } : undefined,
+    title: page.metaTitle || `${page.title} | Why do anything?`,
+    description: page.metaDescription || excerpt(page.content),
+    openGraph: {
+      title: page.metaTitle || page.title,
+      description: page.metaDescription || excerpt(page.content),
+      images: page.featuredImage ? [{ url: page.featuredImage }] : undefined,
+    },
   };
 }
 
@@ -38,9 +44,11 @@ export default async function ContentPage({ params }: Props) {
   if (!result) notFound();
   const { page, ancestors, children } = result;
   const basePath = `/${slug.join("/")}`;
+  const sources = Array.isArray(page.sources) ? page.sources : [];
 
   return (
     <>
+      <ViewCounter pageId={page.id} />
       <article>
         <header className="container-reading pb-10 pt-14 sm:pt-20">
           <Breadcrumbs pages={ancestors} />
@@ -63,6 +71,31 @@ export default async function ContentPage({ params }: Props) {
             className="prose-wda container-reading"
             dangerouslySetInnerHTML={{ __html: page.content }}
           />
+        ) : null}
+
+        {sources.length ? (
+          <section className="container-reading mt-14 border-t border-black/[0.08] pt-8 dark:border-white/[0.09]">
+            <h3 className="flex items-center gap-2 font-serif text-xl">
+              <BookOpen size={18} className="text-moss-700 dark:text-moss-300" /> Evidence & References
+            </h3>
+            <ul className="mt-4 space-y-2 text-sm text-black/60 dark:text-white/55">
+              {sources.map((src: any, i: number) => (
+                <li key={i} className="flex gap-2">
+                  <span className="font-mono text-xs text-black/40 dark:text-white/35">[{i + 1}]</span>
+                  <div>
+                    <span className="font-medium text-black/80 dark:text-white/80">{src.title}</span>
+                    {src.journal ? <span className="italic"> — {src.journal}</span> : null}
+                    {src.year ? <span> ({src.year})</span> : null}
+                    {src.url ? (
+                      <a href={src.url} target="_blank" rel="noopener noreferrer" className="ml-2 text-moss-700 underline dark:text-moss-300">
+                        View Study
+                      </a>
+                    ) : null}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
         ) : null}
       </article>
 

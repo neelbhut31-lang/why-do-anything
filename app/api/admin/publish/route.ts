@@ -1,0 +1,59 @@
+import { NextResponse } from "next/server";
+import { PageStatus } from "@prisma/client";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { db } from "@/lib/db";
+import { PUBLISHED_PAGES_CACHE_TAG, generateAndUploadSnapshot } from "@/lib/pages";
+import { slugify } from "@/lib/utils";
+
+export async function POST(request: Request) {
+  try {
+    const authHeader = request.headers.get("authorization");
+    const secret = process.env.AUTH_SECRET;
+    if (!secret || authHeader !== `Bearer ${secret}`) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { title, slug: customSlug, parentSlug, content, status, featuredImage, sources, metaTitle, metaDescription } = body;
+
+    if (!title) {
+      return NextResponse.json({ error: "Title is required" }, { status: 400 });
+    }
+
+    let parentId: string | null = null;
+    if (parentSlug) {
+      const parent = await db.page.findFirst({ where: { slug: parentSlug } });
+      if (parent) parentId = parent.id;
+    }
+
+    const baseSlug = slugify(customSlug || title) || "untitled";
+    let slug = baseSlug;
+    let suffix = 2;
+    while (await db.page.findFirst({ where: { parentId, slug } })) {
+      slug = `${baseSlug}-${suffix++}`;
+    }
+
+    const page = await db.page.create({
+      data: {
+        title,
+        slug,
+        parentId,
+        content: content || "",
+        featuredImage: featuredImage || null,
+        status: status === "PUBLISHED" ? PageStatus.PUBLISHED : PageStatus.DRAFT,
+        sources: sources || null,
+        metaTitle: metaTitle || null,
+        metaDescription: metaDescription || null,
+      },
+    });
+
+    revalidatePath("/", "layout");
+    revalidateTag(PUBLISHED_PAGES_CACHE_TAG);
+    await generateAndUploadSnapshot();
+
+    return NextResponse.json({ success: true, page });
+  } catch (error: any) {
+    console.error("API publish error:", error);
+    return NextResponse.json({ error: error.message || "Failed to publish page" }, { status: 500 });
+  }
+}

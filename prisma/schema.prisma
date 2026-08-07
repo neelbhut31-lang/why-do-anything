@@ -25,6 +25,10 @@ model Page {
   children      Page[]      @relation("PageHierarchy")
   content       String      @default("")
   featuredImage String?
+  views         Int         @default(0)
+  metaTitle     String?
+  metaDescription String?
+  sources       Json?
   displayOrder  Int         @default(0)
   status        PageStatus  @default(DRAFT)
   createdAt     DateTime    @default(now())
