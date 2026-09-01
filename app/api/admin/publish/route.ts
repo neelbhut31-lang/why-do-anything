@@ -57,8 +57,9 @@ export async function POST(request: Request) {
     await generateAndUploadSnapshot();
 
     return NextResponse.json({ success: true, page });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("API publish error:", error);
-    return NextResponse.json({ error: error.message || "Failed to publish page" }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Failed to publish page";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

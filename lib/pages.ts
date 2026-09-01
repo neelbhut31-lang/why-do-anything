@@ -35,7 +35,7 @@ export async function fetchSnapshotFromStorage(): Promise<Page[] | null> {
     if (data) {
       const text = await data.text();
       const rawPages = JSON.parse(text);
-      if (Array.isArray(rawPages)) {
+      if (Array.isArray(rawPages) && rawPages.length > 0) {
         return rawPages.map((p: Omit<Page, "createdAt" | "updatedAt"> & { createdAt: string; updatedAt: string }) => ({
           ...p,
           createdAt: new Date(p.createdAt),
@@ -86,7 +86,7 @@ export async function generateAndUploadSnapshot() {
 export const getPublishedPages = unstable_cache(
   async () => {
     const snapshot = await fetchSnapshotFromStorage();
-    if (snapshot) {
+    if (snapshot && snapshot.length > 0) {
       return snapshot;
     }
     return db.page.findMany({

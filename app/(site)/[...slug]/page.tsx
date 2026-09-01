@@ -12,6 +12,12 @@ export const revalidate = 300;
 export const dynamicParams = true;
 
 type Props = { params: Promise<{ slug: string[] }> };
+type SourceItem = {
+  title?: string;
+  journal?: string;
+  year?: number | string;
+  url?: string;
+};
 
 export async function generateStaticParams() {
   try {
@@ -79,7 +85,7 @@ export default async function ContentPage({ params }: Props) {
               <BookOpen size={18} className="text-moss-700 dark:text-moss-300" /> Evidence & References
             </h3>
             <ul className="mt-4 space-y-2 text-sm text-black/60 dark:text-white/55">
-              {sources.map((src: any, i: number) => (
+              {(sources as SourceItem[]).map((src, i: number) => (
                 <li key={i} className="flex gap-2">
                   <span className="font-mono text-xs text-black/40 dark:text-white/35">[{i + 1}]</span>
                   <div>

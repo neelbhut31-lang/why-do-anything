@@ -1,3 +1,5 @@
+"use client";
+
 import dynamic from "next/dynamic";
 import type { Page } from "@prisma/client";
 import { deletePageAction, savePageAction } from "@/app/admin/actions";
@@ -18,7 +20,7 @@ export function PageForm({
   saved,
 }: {
   page?: Page;
-  pages: Page[];
+  pages: Array<Pick<Page, "id" | "title" | "parentId">>;
   saved?: boolean;
 }) {
   return (

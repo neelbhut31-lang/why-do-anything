@@ -59,6 +59,13 @@ async function main() {
   await createPage("Stretching", 3);
   await createPage("Eating", 4);
   await createPage("Sleeping", 5);
+
+  try {
+    const { generateAndUploadSnapshot } = await import("../lib/pages");
+    await generateAndUploadSnapshot();
+  } catch (err) {
+    console.warn("Could not upload snapshot during seed:", err);
+  }
 }
 
 main()
@@ -68,3 +75,4 @@ main()
     await db.$disconnect();
     process.exit(1);
   });
+
