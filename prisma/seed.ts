@@ -157,6 +157,27 @@ async function main() {
     `<h2>Environmental & Lifestyle Optimization</h2><p>Consistently high-quality sleep depends on shaping your daily environment to encourage automatic downregulation.</p><h2>Best Practices</h2><ul><li><strong>Ambient Temperature:</strong> Maintain a cool room (around 65°F / 18°C) to allow core temperature reduction.</li><li><strong>Caffeine Timing:</strong> Stop caffeine intake 8–10 hours before sleep due to its 5–7 hour half-life.</li><li><strong>Bedtime Routine:</strong> Engage in calming, low-stimulation activities 30 minutes before sleep.</li></ul>`
   );
 
+  await ensurePage(
+    "Napping & Daytime Recovery",
+    3,
+    sleeping.id,
+    `<h2>Strategic Daytime Rest</h2><p>Napping can relieve accumulated homeostatic sleep pressure without disrupting nighttime sleep architecture when timed correctly.</p><h2>Napping Protocols</h2><ul><li><strong>The 20-Minute Power Nap:</strong> Clears adenosine from the brain, restoring vigilance without entering N3 deep sleep (avoiding sleep inertia).</li><li><strong>The 90-Minute Full Cycle:</strong> Allows a complete NREM/REM cycle for physical and mental recovery when severely sleep-deprived.</li><li><strong>Timing Cutoff:</strong> Complete naps before 3:00 PM to protect nighttime sleep latency.</li></ul>`
+  );
+
+  await ensurePage(
+    "Sleep Debt & Metabolic Health",
+    4,
+    sleeping.id,
+    `<h2>Metabolic Consequences of Sleep Deprivation</h2><p>Chronic partial sleep restriction alters endocrine signaling, blood glucose regulation, and autonomic balance.</p><h2>Hormonal Impact</h2><ul><li><strong>Leptin & Ghrelin:</strong> Leptin (satiety hormone) decreases while ghrelin (hunger hormone) increases, driving appetite for refined carbohydrates.</li><li><strong>Insulin Sensitivity:</strong> Single nights of restricted sleep reduce peripheral insulin sensitivity in muscle and adipose tissue.</li><li><strong>Cortisol & Inflammation:</strong> Elevated evening cortisol levels promote systemic low-grade inflammation.</li></ul>`
+  );
+
+  await ensurePage(
+    "Insomnia & Downregulation",
+    5,
+    sleeping.id,
+    `<h2>Overcoming Hyperarousal & Restoring Sleep</h2><p>Insomnia is frequently driven by autonomic hyperarousal—an imbalance between sympathetic ('fight or flight') and parasympathetic ('rest and digest') tone at bedtime.</p><h2>Downregulation Strategies</h2><ul><li><strong>Stimulus Control:</strong> Reserve the bed strictly for sleep and rest, leaving the bed if awake for more than 20 minutes.</li><li><strong>Parasympathetic Activation:</strong> Slow, extended-exhalation breathing (e.g., 4-7-8 or physiological sighs) downregulates heart rate variability.</li><li><strong>Cognitive Offloading:</strong> Writing down thoughts or to-do lists earlier in the evening reduces nocturnal rumination.</li></ul>`
+  );
+
   // Upload clean snapshot to Supabase Storage if configured
   try {
     const url = process.env.SUPABASE_URL;
