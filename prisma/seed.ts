@@ -61,8 +61,24 @@ async function main() {
   await createPage("Sleeping", 5);
 
   try {
-    const { generateAndUploadSnapshot } = await import("../lib/pages");
-    await generateAndUploadSnapshot();
+    const url = process.env.SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (url && serviceRoleKey) {
+      const { createClient } = await import("@supabase/supabase-js");
+      const supabase = createClient(url, serviceRoleKey, {
+        auth: { autoRefreshToken: false, persistSession: false },
+      });
+      const pages = await db.page.findMany({
+        where: { status: PageStatus.PUBLISHED },
+        orderBy: [{ displayOrder: "asc" }, { title: "asc" }],
+      });
+      await supabase.storage
+        .from("media")
+        .upload("published-pages.json", Buffer.from(JSON.stringify(pages)), {
+          contentType: "application/json",
+          upsert: true,
+        });
+    }
   } catch (err) {
     console.warn("Could not upload snapshot during seed:", err);
   }
