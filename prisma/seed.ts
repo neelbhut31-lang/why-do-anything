@@ -59,8 +59,8 @@ async function main() {
     create: { email, passwordHash: await bcrypt.hash(password, 12) },
   });
 
-  // Clean up any duplicate top-level test pages (e.g. walking-2, sleep-7, etc.)
-  const canonicalSlugs = ["walking", "weight-lifting", "sitting", "stretching", "eating", "sleeping"];
+  // Clean up any duplicate top-level test pages
+  const canonicalSlugs = ["walking", "running", "weight-lifting", "sitting", "stretching", "eating", "sleeping"];
   
   // Delete non-canonical top-level pages
   const unwantedTopPages = await db.page.findMany({
@@ -92,7 +92,14 @@ async function main() {
     `<h2>Understanding Foot Dynamics</h2><p>How your foot contacts the ground affects stress distribution across ankles, knees, and hips. Neither heel strike nor midfoot landing is inherently wrong; velocity and terrain dictate optimal form.</p><blockquote>Allowing the toes to splay naturally helps absorb impact forces efficiently.</blockquote><h2>Key Aspects</h2><ul><li><strong>Cadence Alignment:</strong> Over-striding increases braking force at heel strike. Landing closer to your center of mass reduces joint strain.</li><li><strong>Footwear Impact:</strong> Flexible shoes with minimal heel elevation encourage natural arch engagement.</li></ul>`
   );
 
-  const lifting = await ensurePage("Weight Lifting", 1);
+  await ensurePage(
+    "Running",
+    1,
+    null,
+    `<h2>High-Efficiency Energy Production & Cardiovascular Resilience</h2><p>Running shifts your physiology into high-gear. It demands rapid oxygen transport, metabolic adaptation, and tests the elastic energy storage of your connective tissue.</p><h2>Core Recommendations</h2><ul><li><strong>Zone 2 Base:</strong> Accumulate 150 minutes of weekly Zone 2 running to build mitochondrial density.</li><li><strong>Cadence Control:</strong> Maintain a running cadence between 170–180 steps per minute to lower joint loading.</li><li><strong>Hill Intervals:</strong> Perform hill intervals once a week to strengthen tendons and boost cardiac output.</li></ul><h2>The Mechanics</h2><ul><li><strong>Midfoot Strike:</strong> Land on your midfoot directly under your center of mass, rather than reaching out with your heel.</li><li><strong>Tall Posture:</strong> Maintain a slight forward lean from the ankles, keeping head upright and eyes forward.</li><li><strong>Compact Arm Carriage:</strong> Hold elbows at 90 degrees, moving arms forward-and-back without crossing the body midline.</li><li><strong>Quick Cadence:</strong> Maintain a high step rate (170+ spm) to decrease ground contact time and lower impact loads.</li></ul><h2>The Physiology</h2><ul><li><strong>Cardiovascular Stroke Volume:</strong> Consistent running forces the left ventricle to expand and pump more blood per beat, lowering resting heart rate.</li><li><strong>Fascial Elastic Recoil:</strong> Tendons and fascial bands act as springs, storing energy on landing and releasing it on push-off.</li><li><strong>Mitochondrial Biogenesis:</strong> Aerobic load triggers cells to multiply mitochondria, multiplying your capacity to synthesize ATP and burn fat.</li></ul><h2>Safeguards & Pitfalls</h2><ul><li><strong>Heel Striking:</strong> Landing hard on the heel in front of the body acts as a brake, sending massive forces to the shins and knees.</li><li><strong>Overstriding:</strong> Taking steps that are too wide forces joints to absorb impact rather than utilizing elastic tendons.</li><li><strong>Clenched Upper Body:</strong> Shrugging shoulders and clenching fists wastes energy and restricts ribcage expansion.</li></ul>`
+  );
+
+  const lifting = await ensurePage("Weight Lifting", 2);
   const chest = await ensurePage("Chest", 0, lifting.id, "<p>Chest movements involve horizontal adduction and shoulder stability, engaging the pectoralis major, minor, and anterior deltoids.</p>");
   const fundamentals = await ensurePage("Fundamentals", 0, chest.id);
   await ensurePage(
@@ -110,28 +117,28 @@ async function main() {
 
   await ensurePage(
     "Sitting",
-    2,
+    3,
     null,
     `<h2>Physiology of Prolonged Sitting</h2><p>Sitting is a comfortable, low-energy posture. The issue arises when remaining stationary for hours, reducing blood velocity and metabolic rate.</p><blockquote>Taking 2-minute movement breaks every 45 minutes completely alters the metabolic impact of desk work.</blockquote><h2>Simple Practices</h2><ul><li>Change sitting positions frequently.</li><li>Stand up during phone calls or quick breaks.</li><li>Perform gentle hip extensions to relieve hip flexor tightness.</li></ul>`
   );
 
   await ensurePage(
     "Stretching",
-    3,
+    4,
     null,
     `<h2>The Science of Flexibility</h2><p>Stretching increases range of motion by improving nervous system tolerance and reducing muscular resistance to elongation.</p><h2>When to Use Each Style</h2><ul><li><strong>Dynamic Warmups:</strong> Perform prior to activity to lubricate joints and elevate core body temperature.</li><li><strong>Static Stretching:</strong> Perform after activity when muscles are warm to foster relaxation and downregulate the nervous system.</li></ul>`
   );
 
   await ensurePage(
     "Eating",
-    4,
+    5,
     null,
     `<h2>Nourishing the Body</h2><p>Nutrition provides the building blocks for muscular repair, daily energy, and metabolic balance. Focus on consistent, whole-food nourishment.</p><h2>Key Pillars</h2><ul><li><strong>Protein:</strong> Essential for tissue repair, enzymes, and muscle retention.</li><li><strong>Complex Carbohydrates:</strong> Provide steady glucose for physical performance and brain function.</li><li><strong>Healthy Fats:</strong> Crucial for hormone synthesis and cellular membrane structure.</li></ul>`
   );
 
   const sleeping = await ensurePage(
     "Sleeping",
-    5,
+    6,
     null,
     `<h2>An Active Housekeeping & Biological Rebuilding Process</h2><p>Sleep is the primary state of adaptation. During sleep, your brain flushes metabolic wastes, physical tissues undergo rapid protein synthesis, and cortisol rhythms reset.</p><blockquote>During deep slow-wave sleep, brain cells shrink by 60%, allowing cerebrospinal fluid to wash away metabolic waste like beta-amyloid via the glymphatic system.</blockquote><h2>Core Recommendations</h2><ul><li><strong>Circadian Window:</strong> Maintain a strict sleep window by waking at the exact same time daily, even on weekends.</li><li><strong>Temperature Drop:</strong> Allow core body temperature to drop 2°F (1–2°C) before sleep.</li><li><strong>Light Control:</strong> Eliminate blue/white light exposure in the bedroom to maximize melatonin output.</li></ul><h2>The Mechanics</h2><ul><li><strong>Core Cooling:</strong> Keep the bedroom cool (65–68°F / 18°C) to support the 2-degree drop in core body temperature needed for deep sleep.</li><li><strong>Darkness Exposure:</strong> Block all blue/white light 2 hours before bed to trigger the pineal gland's natural melatonin release.</li><li><strong>Consistent Schedule:</strong> Go to bed and wake up at the exact same time, anchoring your suprachiasmatic nucleus master clock.</li><li><strong>Nasal Breathing:</strong> Practice nasal breathing at night to filter air, increase nitric oxide, and boost arterial oxygenation.</li></ul><h2>The Physiology</h2><ul><li><strong>Glymphatic Cleansing:</strong> Brain glial cells shrink during deep sleep, enabling cerebrospinal fluid to clear toxic protein byproducts.</li><li><strong>Growth Hormone Sump:</strong> The first half of the night is dominated by slow-wave sleep, triggering a massive release of HGH for muscle and organ repair.</li><li><strong>Diurnal Cortisol Declension:</strong> Sleep down-regulates stress hormones. Sleep deprivation halts this decline, resulting in elevated blood pressure and systemic inflammation.</li></ul><h2>Safeguards & Pitfalls</h2><ul><li><strong>Alcohol Sedation:</strong> Alcohol acts as a sedative that blocks REM sleep and increases micro-arousals, leaving you unrested despite being unconscious.</li><li><strong>Snooze Alarm Stress:</strong> Waking up and repeatedly hitting snooze fragments your sleep cycle and causes repeated cortisol spikes.</li><li><strong>Late-Day Caffeine:</strong> Caffeine binds to adenosine receptors, blocking your brain's natural 'sleep pressure' signal for up to 10 hours.</li></ul>`
   );
