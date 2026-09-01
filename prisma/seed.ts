@@ -12,16 +12,33 @@ const introductions: Record<string, string> = {
   Sleeping: "<p>Sleep is active maintenance. It shapes memory, appetite, immune function, tissue recovery, and how effort feels the following day.</p>",
 };
 
-async function createPage(
+async function ensurePage(
   title: string,
   displayOrder: number,
   parentId: string | null = null,
   content = "",
 ) {
+  const slug = title.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const existing = await db.page.findFirst({
+    where: { parentId, slug },
+  });
+
+  if (existing) {
+    return db.page.update({
+      where: { id: existing.id },
+      data: {
+        title,
+        status: PageStatus.PUBLISHED,
+        displayOrder,
+        ...(content ? { content } : {}),
+      },
+    });
+  }
+
   return db.page.create({
     data: {
       title,
-      slug: title.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+      slug,
       parentId,
       displayOrder,
       content: content || introductions[title] || `<p>An introduction to ${title.toLowerCase()} and what it means for your body.</p>`,
@@ -39,26 +56,31 @@ async function main() {
     create: { email, passwordHash: await bcrypt.hash(password, 12) },
   });
 
-  if (await db.page.count()) return;
+  // Clean up duplicate test pages if any
+  await db.page.deleteMany({
+    where: {
+      slug: { in: ["walking-2", "sleep-7"] },
+    },
+  });
 
-  const walking = await createPage("Walking", 0);
-  await createPage("Walking Posture", 0, walking.id, "<h2>Posture is movement, not a pose</h2><p>There is no single perfect shape to hold all day. A useful walking posture lets the head, ribcage, pelvis, and feet share motion without unnecessary effort.</p><blockquote>Comfort often comes from having more positions available, not from finding one correct position.</blockquote><h2>What to notice</h2><ul><li>Whether your gaze stays comfortably ahead</li><li>Whether your arms swing without being forced</li><li>Whether your breath remains easy as pace increases</li></ul>");
-  await createPage("Foot Strike", 1, walking.id);
+  const walking = await ensurePage("Walking", 0);
+  await ensurePage("Walking Posture", 0, walking.id, "<h2>Posture is movement, not a pose</h2><p>There is no single perfect shape to hold all day. A useful walking posture lets the head, ribcage, pelvis, and feet share motion without unnecessary effort.</p><blockquote>Comfort often comes from having more positions available, not from finding one correct position.</blockquote><h2>What to notice</h2><ul><li>Whether your gaze stays comfortably ahead</li><li>Whether your arms swing without being forced</li><li>Whether your breath remains easy as pace increases</li></ul>");
+  await ensurePage("Foot Strike", 1, walking.id);
 
-  const lifting = await createPage("Weight Lifting", 1);
-  const chest = await createPage("Chest", 0, lifting.id);
-  const fundamentals = await createPage("Fundamentals", 0, chest.id);
-  await createPage("Anatomy", 0, fundamentals.id);
-  await createPage("Function", 1, fundamentals.id);
-  const exercises = await createPage("Exercises", 1, chest.id);
-  await createPage("Incline Press", 0, exercises.id);
-  await createPage("Flat Press", 1, exercises.id);
-  await createPage("Pushups", 2, exercises.id);
+  const lifting = await ensurePage("Weight Lifting", 1);
+  const chest = await ensurePage("Chest", 0, lifting.id);
+  const fundamentals = await ensurePage("Fundamentals", 0, chest.id);
+  await ensurePage("Anatomy", 0, fundamentals.id);
+  await ensurePage("Function", 1, fundamentals.id);
+  const exercises = await ensurePage("Exercises", 1, chest.id);
+  await ensurePage("Incline Press", 0, exercises.id);
+  await ensurePage("Flat Press", 1, exercises.id);
+  await ensurePage("Pushups", 2, exercises.id);
 
-  await createPage("Sitting", 2);
-  await createPage("Stretching", 3);
-  await createPage("Eating", 4);
-  await createPage("Sleeping", 5);
+  await ensurePage("Sitting", 2);
+  await ensurePage("Stretching", 3);
+  await ensurePage("Eating", 4);
+  await ensurePage("Sleeping", 5);
 
   try {
     const url = process.env.SUPABASE_URL;
