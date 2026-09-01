@@ -129,11 +129,32 @@ async function main() {
     `<h2>Nourishing the Body</h2><p>Nutrition provides the building blocks for muscular repair, daily energy, and metabolic balance. Focus on consistent, whole-food nourishment.</p><h2>Key Pillars</h2><ul><li><strong>Protein:</strong> Essential for tissue repair, enzymes, and muscle retention.</li><li><strong>Complex Carbohydrates:</strong> Provide steady glucose for physical performance and brain function.</li><li><strong>Healthy Fats:</strong> Crucial for hormone synthesis and cellular membrane structure.</li></ul>`
   );
 
-  await ensurePage(
+  const sleeping = await ensurePage(
     "Sleeping",
     5,
     null,
-    `<h2>The Master Pillar of Health</h2><p>Sleep is the foundation upon which recovery, cognitive performance, and emotional balance rest. Quality sleep optimizes hormone secretion and brain waste clearance.</p><h2>Optimizing Sleep Quality</h2><ul><li><strong>Light Exposure:</strong> View morning sunlight within 30 minutes of waking; dim lights 1–2 hours before sleep.</li><li><strong>Temperature:</strong> Keep your room cool (around 65°F / 18°C) for ideal slow-wave sleep.</li><li><strong>Caffeine Cutoff:</strong> Avoid caffeine 8–10 hours before bedtime due to its long half-life.</li></ul>`
+    `<h2>The Master Pillar of Health</h2><p>Sleep is the foundation upon which recovery, cognitive performance, and emotional balance rest. Quality sleep optimizes hormone secretion, immune function, and brain waste clearance.</p><blockquote>During deep sleep, the brain clears metabolic byproducts via the glymphatic system and facilitates tissue repair throughout the body.</blockquote><h2>Key Areas to Explore</h2><ul><li><strong>Sleep Architecture:</strong> Understanding NREM (deep sleep) and REM cycles.</li><li><strong>Circadian Rhythm:</strong> How light and body temperature govern your internal master clock.</li><li><strong>Sleep Hygiene:</strong> Daily habits and environment controls for restorative rest.</li></ul>`
+  );
+
+  await ensurePage(
+    "Sleep Architecture",
+    0,
+    sleeping.id,
+    `<h2>Stages of Sleep & Physiological Recovery</h2><p>Sleep unfolds in 90-minute cycles alternating between Non-Rapid Eye Movement (NREM) and Rapid Eye Movement (REM) states.</p><h2>Phases of Sleep</h2><ul><li><strong>Stage N3 (Deep / Slow-Wave Sleep):</strong> Growth hormone release peaks, blood pressure drops, and physical tissue repair occurs.</li><li><strong>REM Sleep:</strong> Brain activity accelerates, emotional processing occurs, and memory consolidation takes place.</li></ul>`
+  );
+
+  await ensurePage(
+    "Circadian Rhythm",
+    1,
+    sleeping.id,
+    `<h2>Your Internal Master Clock</h2><p>The suprachiasmatic nucleus (SCN) in the hypothalamus synchronizes organ function with the 24-hour solar day using light and darkness cues.</p><h2>Circadian Anchors</h2><ul><li><strong>Morning Sunlight:</strong> Triggers early cortisol release, boosting daytime alertness and setting the countdown for night melatonin release.</li><li><strong>Evening Darkness:</strong> Dimming overhead lighting 1–2 hours before bed allows natural melatonin synthesis.</li></ul>`
+  );
+
+  await ensurePage(
+    "Sleep Hygiene",
+    2,
+    sleeping.id,
+    `<h2>Environmental & Lifestyle Optimization</h2><p>Consistently high-quality sleep depends on shaping your daily environment to encourage automatic downregulation.</p><h2>Best Practices</h2><ul><li><strong>Ambient Temperature:</strong> Maintain a cool room (around 65°F / 18°C) to allow core temperature reduction.</li><li><strong>Caffeine Timing:</strong> Stop caffeine intake 8–10 hours before sleep due to its 5–7 hour half-life.</li><li><strong>Bedtime Routine:</strong> Engage in calming, low-stimulation activities 30 minutes before sleep.</li></ul>`
   );
 
   // Upload clean snapshot to Supabase Storage if configured
