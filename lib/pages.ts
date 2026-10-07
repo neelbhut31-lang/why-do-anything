@@ -95,7 +95,7 @@ export const getPublishedPages = unstable_cache(
     });
   },
   ["published-pages"],
-  { revalidate: 60, tags: [PUBLISHED_PAGES_CACHE_TAG] },
+  { revalidate: 0, tags: [PUBLISHED_PAGES_CACHE_TAG] },
 );
 
 export async function getPublishedTree() {

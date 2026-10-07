@@ -8,7 +8,7 @@ import { ViewCounter } from "@/components/view-counter";
 import { getPageByPath, getPublishedStaticParams } from "@/lib/pages";
 import { excerpt } from "@/lib/utils";
 
-export const revalidate = 300;
+export const revalidate = 0;
 export const dynamicParams = true;
 
 type Props = { params: Promise<{ slug: string[] }> };
