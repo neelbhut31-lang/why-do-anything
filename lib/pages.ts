@@ -85,14 +85,22 @@ export async function generateAndUploadSnapshot() {
 
 export const getPublishedPages = unstable_cache(
   async () => {
+    try {
+      const dbPages = await db.page.findMany({
+        where: { status: PageStatus.PUBLISHED },
+        orderBy: [{ displayOrder: "asc" }, { title: "asc" }],
+      });
+      if (dbPages && dbPages.length > 0) {
+        return dbPages;
+      }
+    } catch (err) {
+      console.warn("Direct DB query failed, checking storage snapshot:", err);
+    }
     const snapshot = await fetchSnapshotFromStorage();
     if (snapshot && snapshot.length > 0) {
       return snapshot;
     }
-    return db.page.findMany({
-      where: { status: PageStatus.PUBLISHED },
-      orderBy: [{ displayOrder: "asc" }, { title: "asc" }],
-    });
+    return [];
   },
   ["published-pages"],
   { revalidate: 0, tags: [PUBLISHED_PAGES_CACHE_TAG] },
@@ -117,11 +125,27 @@ export async function getPageByPath(segments: string[]) {
     console.warn("Could not load published page:", error);
     return null;
   }
+  
   let parentId: string | null = null;
   const ancestors: Page[] = [];
 
   for (const slug of segments) {
-    const page = pages.find((item) => item.slug === slug && item.parentId === parentId);
+    let page = pages.find((item) => item.slug === slug && item.parentId === parentId);
+    
+    // Direct DB retry if page is missing from initial cache array
+    if (!page) {
+      try {
+        const freshPages = await db.page.findMany({
+          where: { status: PageStatus.PUBLISHED },
+          orderBy: [{ displayOrder: "asc" }, { title: "asc" }],
+        });
+        pages = freshPages;
+        page = pages.find((item) => item.slug === slug && item.parentId === parentId);
+      } catch {
+        // Ignore fallback error
+      }
+    }
+
     if (!page) return null;
     ancestors.push(page);
     parentId = page.id;
