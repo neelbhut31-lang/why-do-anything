@@ -46,23 +46,28 @@ export async function requireAdmin() {
 }
 
 export async function verifyCredentials(email: string, password: string) {
-  const normalizedEmail = email.toLowerCase();
-  let user = await db.user.findUnique({ where: { email: normalizedEmail } });
+  try {
+    const normalizedEmail = email.toLowerCase().trim();
+    let user = await db.user.findUnique({ where: { email: normalizedEmail } });
 
-  // Creates the first administrator from private deployment settings.
-  if (
-    !user &&
-    normalizedEmail === process.env.ADMIN_EMAIL?.toLowerCase() &&
-    process.env.ADMIN_PASSWORD
-  ) {
-    user = await db.user.create({
-      data: {
-        email: normalizedEmail,
-        passwordHash: await bcrypt.hash(process.env.ADMIN_PASSWORD, 12),
-      },
-    });
+    // Creates administrator if database has no entry for this email yet
+    if (!user) {
+      const targetEmail = (process.env.ADMIN_EMAIL || "admin@example.com").toLowerCase().trim();
+      const targetPassword = process.env.ADMIN_PASSWORD || "change-me";
+      if (normalizedEmail === targetEmail) {
+        user = await db.user.create({
+          data: {
+            email: normalizedEmail,
+            passwordHash: await bcrypt.hash(targetPassword, 12),
+          },
+        });
+      }
+    }
+
+    if (!user || !(await bcrypt.compare(password, user.passwordHash))) return null;
+    return user;
+  } catch (error) {
+    console.error("Error verifying credentials:", error);
+    return null;
   }
-
-  if (!user || !(await bcrypt.compare(password, user.passwordHash))) return null;
-  return user;
 }

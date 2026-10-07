@@ -10,12 +10,20 @@ import { PUBLISHED_PAGES_CACHE_TAG, generateAndUploadSnapshot } from "@/lib/page
 import { slugify } from "@/lib/utils";
 
 export async function loginAction(formData: FormData) {
-  const email = String(formData.get("email") ?? "");
-  const password = String(formData.get("password") ?? "");
-  const user = await verifyCredentials(email, password);
-  if (!user) redirect("/admin/login?error=Invalid%20email%20or%20password");
-  await createSession(user.id, user.email);
-  redirect("/admin");
+  try {
+    const email = String(formData.get("email") ?? "").trim();
+    const password = String(formData.get("password") ?? "");
+    const user = await verifyCredentials(email, password);
+    if (!user) redirect("/admin/login?error=Invalid%20email%20or%20password");
+    await createSession(user.id, user.email);
+    redirect("/admin");
+  } catch (error) {
+    if (typeof error === "object" && error !== null && "digest" in error && typeof (error as { digest: string }).digest === "string" && (error as { digest: string }).digest.startsWith("NEXT_REDIRECT")) {
+      throw error;
+    }
+    console.error("Login action error:", error);
+    redirect("/admin/login?error=Invalid%20email%20or%20password");
+  }
 }
 
 export async function logoutAction() {
